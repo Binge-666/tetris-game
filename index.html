@@ -358,12 +358,12 @@
         }
 
         function exitGame() {
-            if (confirm("确定要退出游戏吗？")) {
-                resetGame();
-                alert("游戏已退出");
-            }
-        }
-
+    window.close();
+    // 如果 window.close() 不起作用，提示用户手动关闭
+    setTimeout(function() {
+        alert('请直接关闭浏览器窗口来退出游戏');
+    }, 100);
+}
         document.addEventListener('keydown', (e) => {
             if (gameInterval) {
                 switch (e.key) {
