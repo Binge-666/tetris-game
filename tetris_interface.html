@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄罗斯方块</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1e1e;
+            background-image: linear-gradient(135deg, #1e1e1e 25%, #2c2c2c 25%, #2c2c2c 50%, #1e1e1e 50%, #1e1e1e 75%, #2c2c2c 75%, #2c2c2c 100%);
+            background-size: 56.57px 56.57px;
+        }
+        .game-container {
+            display: flex;
+            gap: 30px;
+            background-color: #2e2e2e;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            animation: fadeIn 0.5s ease-out;
+        }
+        #gameBoard {
+            width: 240px;
+            height: 480px;
+            border: 3px solid #ffffff;
+            background-color: #1a1a1a;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(24, 1fr);
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .cell {
+            border: 1px solid #333333;
+            box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .active {
+            border: 2px solid #ffffff;
+        }
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 160px;
+        }
+        .score, .level {
+            font-size: 20px;
+            font-weight: bold;
+            background-color: #3a3a3a;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        button {
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+            color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        button:hover {
+            transform: translateY(-3px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        #startBtn {
+            background-color: #4CAF50;
+        }
+        #resetBtn {
+            background-color: #f44336;
+        }
+        #exitBtn {
+            background-color: #2196F3;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="gameBoard"></div>
+        <div class="side-panel">
+            <div class="score">分数: <span id="score">0</span></div>
+            <div class="level">等级: <span id="level">1</span></div>
+            <div class="controls">
+                <button id="startBtn" onclick="startGame()">开始</button>
+                <button id="resetBtn" onclick="resetGame()">重新开始</button>
+                <button id="exitBtn" onclick="exitGame()">退出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音频元素 -->
+    <audio id="moveSound" src="sounds/move.mp3" preload="auto"></audio>
+    <audio id="rotateSound" src="sounds/rotate.mp3" preload="auto"></audio>
+    <audio id="lockSound" src="sounds/lock.mp3" preload="auto"></audio>
+    <audio id="clearLineSound" src="sounds/clear_line.mp3" preload="auto"></audio>
+    <audio id="gameOverSound" src="sounds/game_over.mp3" preload="auto"></audio>
+    <audio id="backgroundMusic" src="sounds/background_music.mp3" preload="auto" loop></audio>
+
+    <script>
+        const gameBoard = document.getElementById('gameBoard');
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        let score = 0;
+        let level = 1;
+        let gameInterval;
+        let currentPiece;
+        let board = Array(24).fill().map(() => Array(10).fill(0)); // 24行，底部4行作为隐藏区域
+        const ROWS = 20;
+        const COLUMNS = 10;
+
+        const pieces = [
+            [[1, 1, 1, 1]], // I
+            [[1, 1], [1, 1]], // O
+            [[1, 1, 1], [0, 1, 0]], // T
+            [[1, 1, 1], [1, 0, 0]], // J
+            [[1, 1, 1], [0, 0, 1]], // L
+            [[1, 1, 0], [0, 1, 1]], // S
+            [[0, 1, 1], [1, 1, 0]]  // Z
+        ];
+
+        const colors = ['#00FFFF', '#FFFF00', '#800080', '#0000FF', '#FFA500', '#00FF00', '#FF0000'];
+
+        // 获取音频元素
+        const moveSound = document.getElementById('moveSound');
+        const rotateSound = document.getElementById('rotateSound');
+        const lockSound = document.getElementById('lockSound');
+        const clearLineSound = document.getElementById('clearLineSound');
+        const gameOverSound = document.getElementById('gameOverSound');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+
+        function initializeBoard() {
+            gameBoard.innerHTML = '';
+            for (let y = 0; y < board.length; y++) {
+                for (let x = 0; x < board[0].length; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    gameBoard.appendChild(cell);
+                }
+            }
+            drawBoard();
+        }
+
+        function drawBoard() {
+            const cells = gameBoard.getElementsByClassName('cell');
+            board.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    const index = y * COLUMNS + x;
+                    cells[index].style.backgroundColor = value ? value : '';
+                });
+            });
+        }
+
+        function createPiece() {
+            const pieceType = Math.floor(Math.random() * pieces.length);
+            const color = colors[pieceType];
+            currentPiece = {
+                shape: pieces[pieceType],
+                color: color,
+                x: Math.floor((COLUMNS - pieces[pieceType][0].length) / 2),
+                y: 0
+            };
+            if (collision()) {
+                endGame();
+            }
+            drawPiece();
+        }
+
+        function drawPiece() {
+            if (!currentPiece) return;
+            currentPiece.shape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        if (boardY >= 0 && boardY < board.length && boardX >= 0 && boardX < board[0].length) {
+                            const index = boardY * COLUMNS + boardX;
+                            const cell = gameBoard.getElementsByClassName('cell')[index];
+                            cell.style.backgroundColor = currentPiece.color;
+                        }
+                    }
+                });
+            });
+        }
+
+        function erasePiece() {
+            if (!currentPiece) return;
+            currentPiece.shape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        if (boardY >= 0 && boardY < board.length && boardX >= 0 && boardX < board[0].length) {
+                            const index = boardY * COLUMNS + boardX;
+                            const cell = gameBoard.getElementsByClassName('cell')[index];
+                            cell.style.backgroundColor = board[boardY][boardX] ? board[boardY][boardX] : '';
+                        }
+                    }
+                });
+            });
+        }
+
+        function movePiece(dx, dy) {
+            erasePiece();
+            currentPiece.x += dx;
+            currentPiece.y += dy;
+            if (collision()) {
+                currentPiece.x -= dx;
+                currentPiece.y -= dy;
+                if (dy !== 0) {
+                    mergePiece();
+                    clearLines();
+                    createPiece();
+                    lockSound.currentTime = 0;
+                    lockSound.play(); // 播放锁定音效
+                }
+            } else {
+                if (dx !== 0) {
+                    moveSound.currentTime = 0;
+                    moveSound.play(); // 播放移动音效
+                }
+                if (dy !== 0) {
+                    // 您可以在此处添加下落音效（可选）
+                }
+            }
+            drawPiece();
+        }
+
+        function rotatePiece() {
+            erasePiece();
+            const rotated = currentPiece.shape[0].map((_, i) =>
+                currentPiece.shape.map(row => row[i]).reverse()
+            );
+            const previousShape = currentPiece.shape;
+            currentPiece.shape = rotated;
+            if (collision()) {
+                currentPiece.shape = previousShape;
+            } else {
+                rotateSound.currentTime = 0;
+                rotateSound.play(); // 播放旋转音效
+            }
+            drawPiece();
+        }
+
+        function collision() {
+            return currentPiece.shape.some((row, y) => {
+                return row.some((value, x) => {
+                    if (value) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        return (
+                            boardX < 0 ||
+                            boardX >= COLUMNS ||
+                            boardY >= board.length ||
+                            (boardY >= 0 && board[boardY][boardX])
+                        );
+                    }
+                    return false;
+                });
+            });
+        }
+
+        function mergePiece() {
+            currentPiece.shape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        if (boardY >= 0 && boardY < board.length && boardX >= 0 && boardX < board[0].length) {
+                            board[boardY][boardX] = currentPiece.color;
+                        }
+                    }
+                });
+            });
+        }
+
+        function clearLines() {
+            let linesCleared = 0;
+            for (let y = board.length - 1; y >= 0; y--) {
+                if (board[y].every(cell => cell !== 0)) {
+                    board.splice(y, 1);
+                    board.unshift(Array(COLUMNS).fill(0));
+                    linesCleared++;
+                    y++;
+                }
+            }
+            if (linesCleared > 0) {
+                score += linesCleared * 100;
+                level = Math.floor(score / 1000) + 1;
+                scoreElement.textContent = score;
+                levelElement.textContent = level;
+                clearLineSound.currentTime = 0;
+                clearLineSound.play(); // 播放消行音效
+            }
+            drawBoard();
+        }
+
+        function gameLoop() {
+            movePiece(0, 1);
+            drawBoard();
+        }
+
+        function startGame() {
+            if (!gameInterval) {
+                resetGame();
+                createPiece();
+                gameInterval = setInterval(gameLoop, Math.max(1000 - (level - 1) * 100, 100));
+                backgroundMusic.play(); // 开始时播放背景音乐
+            }
+        }
+
+        function resetGame() {
+            clearInterval(gameInterval);
+            gameInterval = null;
+            board = Array(24).fill().map(() => Array(10).fill(0));
+            score = 0;
+            level = 1;
+            scoreElement.textContent = score;
+            levelElement.textContent = level;
+            initializeBoard();
+            backgroundMusic.pause(); // 暂停背景音乐
+            backgroundMusic.currentTime = 0; // 重置背景音乐播放位置
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            gameInterval = null;
+            backgroundMusic.pause(); // 暂停背景音乐
+            backgroundMusic.currentTime = 0;
+            gameOverSound.currentTime = 0;
+            gameOverSound.play(); // 播放游戏结束音效
+            alert('游戏结束！');
+        }
+
+        function exitGame() {
+            if (confirm("确定要退出游戏吗？")) {
+                resetGame();
+                alert("游戏已退出");
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (gameInterval) {
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        movePiece(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        movePiece(1, 0);
+                        break;
+                    case 'ArrowDown':
+                        movePiece(0, 1);
+                        break;
+                    case 'ArrowUp':
+                        rotatePiece();
+                        break;
+                }
+            }
+        });
+
+        // 初始化游戏板
+        initializeBoard();
+    </script>
+</body>
+</html>
