@@ -1,6 +1,6 @@
 # 俄罗斯方块游戏
 
-![项目封面](https://github.com/Binge-666/tetris-game/blob/main/screenshots/cover.png?raw=true)
+![项目封面](https://github.com/Binge-666/tetris-game/blob/main/images/cover.png?raw=true)
 
 ## 项目简介
 
@@ -29,9 +29,9 @@
 
 ## 项目截图
 
-![游戏界面](https://github.com/Binge-666/tetris-game/blob/main/screenshots/game_interface.png?raw=true)
-![游戏进行中](https://github.com/Binge-666/tetris-game/blob/main/screenshots/game_playing.png?raw=true)
-![游戏结束](https://github.com/Binge-666/tetris-game/blob/main/screenshots/game_over.png?raw=true)
+![游戏界面](https://github.com/Binge-666/tetris-game/blob/main/images/game_interface.png?raw=true)
+![游戏进行中](https://github.com/Binge-666/tetris-game/blob/main/images/game_playing.png?raw=true)
+![游戏结束](https://github.com/Binge-666/tetris-game/blob/main/images/game_over.png?raw=true)
 
 ## 安装与运行
 
