@@ -8,6 +8,7 @@
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -15,6 +16,7 @@
             background-color: #1e1e1e;
             background-image: linear-gradient(135deg, #1e1e1e 25%, #2c2c2c 25%, #2c2c2c 50%, #1e1e1e 50%, #1e1e1e 75%, #2c2c2c 75%, #2c2c2c 100%);
             background-size: 56.57px 56.57px;
+            position: relative;
         }
         .game-container {
             display: flex;
@@ -93,6 +95,17 @@
             background-color: #2196F3;
         }
 
+        /* 作者信息样式 */
+        .author-info {
+            position: absolute;
+            bottom: 20px;
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
         /* 动画效果 */
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
@@ -113,6 +126,7 @@
             </div>
         </div>
     </div>
+    <div class="author-info">游戏制作：斌哥</div>
 
     <!-- 音频元素 -->
     <audio id="moveSound" src="sounds/move.mp3" preload="auto"></audio>
@@ -121,7 +135,6 @@
     <audio id="clearLineSound" src="sounds/clear_line.mp3" preload="auto"></audio>
     <audio id="gameOverSound" src="sounds/game_over.mp3" preload="auto"></audio>
     <audio id="backgroundMusic" src="sounds/background_music.mp3" preload="auto" loop></audio>
-
     <script>
         const gameBoard = document.getElementById('gameBoard');
         const scoreElement = document.getElementById('score');
@@ -237,15 +250,12 @@
                     clearLines();
                     createPiece();
                     lockSound.currentTime = 0;
-                    lockSound.play(); // 播放锁定音效
+                    lockSound.play();
                 }
             } else {
                 if (dx !== 0) {
                     moveSound.currentTime = 0;
-                    moveSound.play(); // 播放移动音效
-                }
-                if (dy !== 0) {
-                    // 您可以在此处添加下落音效（可选）
+                    moveSound.play();
                 }
             }
             drawPiece();
@@ -262,7 +272,7 @@
                 currentPiece.shape = previousShape;
             } else {
                 rotateSound.currentTime = 0;
-                rotateSound.play(); // 播放旋转音效
+                rotateSound.play();
             }
             drawPiece();
         }
@@ -315,7 +325,7 @@
                 scoreElement.textContent = score;
                 levelElement.textContent = level;
                 clearLineSound.currentTime = 0;
-                clearLineSound.play(); // 播放消行音效
+                clearLineSound.play();
             }
             drawBoard();
         }
@@ -330,7 +340,7 @@
                 resetGame();
                 createPiece();
                 gameInterval = setInterval(gameLoop, Math.max(1000 - (level - 1) * 100, 100));
-                backgroundMusic.play(); // 开始时播放背景音乐
+                backgroundMusic.play();
             }
         }
 
@@ -343,27 +353,27 @@
             scoreElement.textContent = score;
             levelElement.textContent = level;
             initializeBoard();
-            backgroundMusic.pause(); // 暂停背景音乐
-            backgroundMusic.currentTime = 0; // 重置背景音乐播放位置
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
         }
 
         function endGame() {
             clearInterval(gameInterval);
             gameInterval = null;
-            backgroundMusic.pause(); // 暂停背景音乐
+            backgroundMusic.pause();
             backgroundMusic.currentTime = 0;
             gameOverSound.currentTime = 0;
-            gameOverSound.play(); // 播放游戏结束音效
+            gameOverSound.play();
             alert('游戏结束！');
         }
 
         function exitGame() {
-    window.close();
-    // 如果 window.close() 不起作用，提示用户手动关闭
-    setTimeout(function() {
-        alert('请直接关闭浏览器窗口来退出游戏');
-    }, 100);
-}
+            window.close();
+            setTimeout(function() {
+                alert('请直接关闭浏览器窗口来退出游戏');
+            }, 100);
+        }
+
         document.addEventListener('keydown', (e) => {
             if (gameInterval) {
                 switch (e.key) {
