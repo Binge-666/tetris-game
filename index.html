@@ -9,15 +9,17 @@
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
+            min-height: 100vh;
             margin: 0;
             background-color: #1e1e1e;
             background-image: linear-gradient(135deg, #1e1e1e 25%, #2c2c2c 25%, #2c2c2c 50%, #1e1e1e 50%, #1e1e1e 75%, #2c2c2c 75%, #2c2c2c 100%);
             background-size: 56.57px 56.57px;
             position: relative;
+            overflow: hidden;
         }
+
         .game-container {
             display: flex;
             gap: 30px;
@@ -26,76 +28,96 @@
             border-radius: 15px;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
             color: #ffffff;
-            animation: fadeIn 0.5s ease-out;
+            position: relative;
         }
+
         #gameBoard {
             width: 240px;
             height: 480px;
-            border: 3px solid #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 5px;
             background-color: #1a1a1a;
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(24, 1fr);
-            position: relative;
-            overflow: hidden;
-            border-radius: 10px;
         }
-        .cell {
-            border: 1px solid #333333;
-            box-sizing: border-box;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .active {
-            border: 2px solid #ffffff;
-        }
+
         .side-panel {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
             width: 160px;
         }
+
         .score, .level {
             font-size: 20px;
             font-weight: bold;
+            padding: 10px;
             background-color: #3a3a3a;
-            padding: 15px;
             border-radius: 8px;
             text-align: center;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         }
+
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
+
         button {
             padding: 12px;
             font-size: 16px;
             cursor: pointer;
             border: none;
             border-radius: 8px;
-            transition: background-color 0.3s, transform 0.1s;
             color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
         }
-        button:hover {
-            transform: translateY(-3px);
-        }
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
-        }
+
         #startBtn {
             background-color: #4CAF50;
         }
+
         #resetBtn {
             background-color: #f44336;
         }
+
         #exitBtn {
             background-color: #2196F3;
         }
 
-        /* 作者信息样式 */
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .game-instructions {
+            margin-top: 20px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .instruction-row {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .key-box {
+            background-color: #3a3a3a;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #4CAF50;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .instruction-text {
+            color: #ffffff;
+        }
+
         .author-info {
             position: absolute;
             bottom: 20px;
@@ -106,25 +128,156 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+        /* 禁用不必要的交互 */
+        .game-container, .side-panel, .game-instructions, .instruction-row, .key-box {
+            pointer-events: none;
+            user-select: none;
         }
+
+        /* 保持按钮可点击 */
+        .controls, button {
+            pointer-events: auto;
+        }
+
+        /* 组合键样式 */
+        .combo-key {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .combo-key .key-box {
+            margin: 0 2px;
+        }
+
+        /* 操作说明标题 */
+        .instructions-title {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+          /* 修改游戏板网格样式 */
+    #gameBoard {
+        width: 240px;
+        height: 480px;
+        border: 2px solid #ffffff;
+        border-radius: 5px;
+        background-color: #1a1a1a;
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        grid-template-rows: repeat(24, 1fr);
+        position: relative;
+        /* 添加网格线 */
+        background-image: 
+            linear-gradient(to right, #333 1px, transparent 1px),
+            linear-gradient(to bottom, #333 1px, transparent 1px);
+        background-size: 24px 20px; /* 10列，24列 */
+    }
+
+     /* 修改主容器样式 */
+     .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #2e2e2e;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        color: #ffffff;
+        gap: 15px;  /* 控制各元素间距 */
+    }
+
+    /* 游戏主体区域 */
+    .game-main {
+        display: flex;
+        gap: 30px;
+    }
+
+    /* 变换操作说明区域 */
+    .transform-controls {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        background-color: #3a3a3a;
+        padding: 12px 20px;
+        border-radius: 8px;
+        width: calc(100% - 40px);  /* 减去padding */
+        margin-top: -5px;  /* 向上调整位置 */
+    }
+
+    .transform-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .transform-title {
+        color: #4CAF50;
+        font-size: 16px;
+    }
+
+    /* 作者信息样式 */
+    .author-info {
+        color: #4c91af;
+        font-size: 16px;
+        text-align: center;
+        margin-top: 5px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <div id="gameBoard"></div>
-        <div class="side-panel">
-            <div class="score">分数: <span id="score">0</span></div>
-            <div class="level">等级: <span id="level">1</span></div>
-            <div class="controls">
-                <button id="startBtn" onclick="startGame()">开始</button>
-                <button id="resetBtn" onclick="resetGame()">重新开始</button>
-                <button id="exitBtn" onclick="exitGame()">退出</button>
+        <div class="game-main">
+            <div id="gameBoard"></div>
+            <div class="side-panel">
+                <div class="score">分数: <span id="score">0</span></div>
+                <div class="level">等级: <span id="level">1</span></div>
+                <div class="controls">
+                    <button id="startBtn" onclick="startGame()">开始</button>
+                    <button id="resetBtn" onclick="resetGame()">重新开始</button>
+                    <button id="exitBtn" onclick="exitGame()">退出</button>
+                </div>
+                <div class="basic-controls">
+                    <div class="instructions-title">基础操作</div>
+                    <div class="instruction-row">
+                        <div class="key-box">↑</div>
+                        <div class="instruction-text">旋转方块</div>
+                    </div>
+                    <div class="instruction-row">
+                        <div class="key-box">←</div>
+                        <div class="instruction-text">向左移动</div>
+                    </div>
+                    <div class="instruction-row">
+                        <div class="key-box">→</div>
+                        <div class="instruction-text">向右移动</div>
+                    </div>
+                    <div class="instruction-row">
+                        <div class="key-box">↓</div>
+                        <div class="instruction-text">加速下落</div>
+                    </div>
+                </div>
             </div>
         </div>
+    
+        <div class="transform-controls">
+            <div class="transform-group">
+                <span class="transform-title">左变换:</span>
+                <div class="key-box">↑</div>
+                <div class="key-box">+</div>
+                <div class="key-box">←</div>
+            </div>
+            <div class="transform-group">
+                <span class="transform-title">右变换:</span>
+                <div class="key-box">↑</div>
+                <div class="key-box">+</div>
+                <div class="key-box">→</div>
+            </div>
+        </div>
+    
+       
     </div>
     <div class="author-info">游戏制作：斌哥</div>
 
@@ -396,5 +549,6 @@
         // 初始化游戏板
         initializeBoard();
     </script>
+     
 </body>
 </html>
