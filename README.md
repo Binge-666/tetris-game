@@ -29,9 +29,9 @@
 
 ## 项目截图
 
-![游戏界面](https://github.com/Binge-666/tetris-game/blob/main/images/game_interface.png?raw=true)
-![游戏进行中](https://github.com/Binge-666/tetris-game/blob/main/images/game_playing.png?raw=true)
-![游戏结束](https://github.com/Binge-666/tetris-game/blob/main/images/game_over.png?raw=true)
+![游戏界面](https://github.com/Binge-666/tetris-game/blob/main/images/interface.png?raw=true)
+![游戏进行中](https://github.com/Binge-666/tetris-game/blob/main/images/playing.png?raw=true)
+![游戏结束](https://github.com/Binge-666/tetris-game/blob/main/images/gameover.png?raw=true)
 
 ## 安装与运行
 
